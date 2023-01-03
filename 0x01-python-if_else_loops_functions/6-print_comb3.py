@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-for a in range(0, 10):
-    for b in range(0, 10):
-        if a != b and a < b:
-            print("{:d}{:d}".format(a, b), end="")
-            if a == 8 and b == 9:
-                print("")
-            else:
-                print(", ", end="") 
+for i in range(9):
+    for j in range(i + 1, 10):
+        if i * 10 + j < 89:
+            print("{:d}{:d}".format(i, j), end=", ")
+print("{:d}".format(89))
