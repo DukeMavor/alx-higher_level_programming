@@ -1,8 +1,11 @@
 #!/usr/bin/python3
+import traceback as tb
+
+
 def safe_function(fct, *args):
-    import sys
     try:
-        return(fct(*args))
-    except:
-        sys.stderr.write("Exception: {}\n".format(sys.exc_info()[1]))
-        return(None)
+        result = fct(*args)
+    except Exception as e:
+        tb.print_exception(Exception, Exception(e), None)
+        result = None
+    return result
