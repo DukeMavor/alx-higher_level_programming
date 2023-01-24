@@ -1,53 +1,63 @@
 #!/usr/bin/python3
+""" Module providing a definition of a class 'Square'
+"""
 
 
-class Square:
-    """Class to represent a square"""
+class Square():
+    """ Definition of a 'Square'
+    """
     def __init__(self, size=0):
+        """ Instantiate a 'Square'
+        """
         self.size = size
 
-    def area(self):
-        return (self.__size ** 2)
+    def __lt__(self, to_compare):
+        """ Compare the area of two squares
+        """
+        return self.area() < to_compare.area()
+
+    def __le__(self, to_compare):
+        """ Compare the area of two squares
+        """
+        return self.area() <= to_compare.area()
+
+    def __eq__(self, to_compare):
+        """ Compare the area of two squares
+        """
+        return self.area() == to_compare.area()
+
+    def __ne__(self, to_compare):
+        """ Compare the area of two squares
+        """
+        return self.area() != to_compare.area()
+
+    def __ge__(self, to_compare):
+        """ Compare the area of two squares
+        """
+        return self.area() >= to_compare.area()
+
+    def __gt__(self, to_compare):
+        """ Compare the area of two squares
+        """
+        return self.area() > to_compare.area()
 
     @property
     def size(self):
+        """ Get the size of a square
+        """
         return self.__size
 
     @size.setter
-    def size(self, value):
-        if type(value) is not int:
+    def size(self, size):
+        """ Set the size of a square
+        """
+        if not isinstance(size, int):
             raise TypeError("size must be an integer")
-        elif value < 0:
+        if size < 0:
             raise ValueError("size must be >= 0")
-        else:
-            self.__size = value
+        self.__size = size
 
-    def __eq__(self, other):
-        if self.area() == other.area():
-            return True
-        return False
-
-    def __ne__(self, other):
-        if self.area() != other.area():
-            return True
-        return False
-
-    def __gt__(self, other):
-        if self.area() > other.area():
-            return True
-        return False
-
-    def __ge__(self, other):
-        if self.area() >= other.area():
-            return True
-        return False
-
-    def __lt__(self, other):
-        if self.area() < other.area():
-            return True
-        return False
-
-    def __le__(self, other):
-        if self.area() <= other.area():
-            return True
-        return False
+    def area(self):
+        """ Compute the area of a 'Square'
+        """
+        return self.size ** 2
