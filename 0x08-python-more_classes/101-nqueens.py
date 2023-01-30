@@ -1,152 +1,142 @@
 #!/usr/bin/python3
-"""Program to compute solutions to the 'N Queens' problem.
+"""Solves the N-queens puzzle.
 
-The 'N Queens' problem is to enumerate all the possible arrangements
-of N Queens on an NxN chessboard such that no two pieces lie along
-the same vertical, horizontal, or diagonal. It is difficult to compute
-by brute force because even for relatively small `n` the number of
-arrangements to test grows factorially (N**2 choose N). The solution
-uses backtracking to quickly prune the tree of possible arrangments by
-abandoning unsuccessful branches once a partial solution can be rejected.
+Determines all possible solutions to placing N
+N non-attacking queens on an NxN chessboard.
 
 Example:
-    This program can be invoked from the command line by specifying the
-    value for `n`, such as:
+    $ ./101-nqueens.py N
 
-        $ ./nqueens 8
+N must be an integer greater than or equal to 4.
+
+Attributes:
+    board (list): A list of lists representing the chessboard.
+    solutions (list): A list of lists containing solutions.
+
+Solutions are represented in the format [[r, c], [r, c], [r, c], [r, c]]
+where `r` and `c` represent the row and column, respectively, where a
+queen must be placed on the chessboard.
 """
+import sys
 
 
-def nqueens(n, c=[]):
-    """Routine to recursively compute solutions to N queens problem.
+def init_board(n):
+    """Initialize an `n`x`n` sized chessboard with 0's."""
+    board = []
+    [board.append([]) for i in range(n)]
+    [row.append(' ') for i in range(n) for row in board]
+    return (board)
 
-    Recursively computes solutions until all branches of solution
-    tree have been visited. Partial solutions that can be rejected
-    are skipped over.
 
-    Args:
-        n (int): dimensions of board and number of queens.
-        c (list): list of current candidate positions for solution.
+def board_deepcopy(board):
+    """Return a deepcopy of a chessboard."""
+    if isinstance(board, list):
+        return list(map(board_deepcopy, board))
+    return (board)
 
-    Output: Prints valid solutions to stdout.
+
+def get_solution(board):
+    """Return the list of lists representation of a solved chessboard."""
+    solution = []
+    for r in range(len(board)):
+        for c in range(len(board)):
+            if board[r][c] == "Q":
+                solution.append([r, c])
+                break
+    return (solution)
+
+
+def xout(board, row, col):
+    """X out spots on a chessboard.
+
+All spots where non-attacking queens can no
+    longer be played are X-ed out.
+
+Args:
+        board (list): The current working chessboard.
+        row (int): The row where a queen was last played.
+        col (int): The column where a queen was last played.
     """
-    if reject(n, c):
-        return
-    if accept(n, c):
-        print(c)
-    s = first_candidate(n, c)
-    while s is not None:
-        nqueens(n, s)
-        s = next_candidate(n, s)
+    # X out all forward spots
+    for c in range(col + 1, len(board)):
+        board[row][c] = "x"
+    # X out all backwards spots
+    for c in range(col - 1, -1, -1):
+        board[row][c] = "x"
+    # X out all spots below
+    for r in range(row + 1, len(board)):
+        board[r][col] = "x"
+    # X out all spots above
+    for r in range(row - 1, -1, -1):
+        board[r][col] = "x"
+    # X out all spots diagonally down to the right
+    c = col + 1
+    for r in range(row + 1, len(board)):
+        if c >= len(board):
+            break
+        board[r][c] = "x"
+        c += 1
+    # X out all spots diagonally up to the left
+    c = col - 1
+    for r in range(row - 1, -1, -1):
+        if c < 0:
+            break
+        board[r][c]
+        c -= 1
+    # X out all spots diagonally up to the right
+    c = col + 1
+    for r in range(row - 1, -1, -1):
+        if c >= len(board):
+            break
+        board[r][c] = "x"
+        c += 1
+    # X out all spots diagonally down to the left
+    c = col - 1
+    for r in range(row + 1, len(board)):
+        if c < 0:
+            break
+        board[r][c] = "x"
+        c -= 1
 
 
-def reject(n, c):
-    """Subroutine to test whether current partial solution is valid.
+def recursive_solve(board, row, queens, solutions):
+    """Recursively solve an N-queens puzzle.
 
-    Tests whether the most recently added position is in conflict
-    with any other positions. Earlier positions are assumed to be
-    valid as they were previously tested against those in the list
-    before them.
-
-    Args:
-        n (int): dimensions of board and number of queens.
-        c (list): list of current candidate positions for solution.
-
-    Returns: True if the final position is in conflict with an earlier
-        position, otherwise False.
+Args:
+        board (list): The current working chessboard.
+        row (int): The current working row.
+        queens (int): The current number of placed queens.
+        solutions (list): A list of lists of solutions.
+    Returns:
+        solutions
     """
-    try:
-        last = c[-1]
-    except IndexError:
-        return False
-    for i in c[:-1]:
-        if i[0] == last[0] or i[1] == last[1]:
-            return True
-        if abs(last[0] - i[0]) == abs(last[1] - i[1]):
-            return True
-    return False
+    if queens == len(board):
+        solutions.append(get_solution(board))
+        return (solutions)
 
+    for c in range(len(board)):
+        if board[row][c] == " ":
+            tmp_board = board_deepcopy(board)
+            tmp_board[row][c] = "Q"
+            xout(tmp_board, row, c)
+            solutions = recursive_solve(tmp_board, row + 1,
+                                        queens + 1, solutions)
 
-def accept(n, c):
-    """Subroutine to test whether current list of positions is a solution.
-
-    If the current candidate solution has not been rejected and is of
-    length `n`, then it can be assumed to be a valid solution.
-
-    Args:
-        n (int): dimensions of board and number of queens.
-        c (list): list of current candidate positions for solution.
-
-    Returns: True if len(c) == n, otherwise False.
-    """
-    if len(c) == n:
-        return True
-    return False
-
-
-def first_candidate(n, c):
-    """Subroutine to add position to the end of the candidate solution.
-
-    If the previous position was not rejected and the length of the
-    `c` is less than `n`, this function adds the next candidate position
-    following the last position.
-
-    Args:
-        n (int): dimensions of board and number of queens.
-        c (list): list of current candidate positions for solution.
-
-    Returns: New list with added position, or None if len(c) == n.
-    """
-    if len(c) == n:
-        return None
-    try:
-        last = c[-1]
-    except IndexError:
-        return [[0, 0]]
-    if last[1] < n-1:
-        return c + [[last[0], last[1]+1]]
-    elif last[0] < n-1:
-        return c + [[last[0]+1, 0]]
-    else:
-        return None
-
-
-def next_candidate(n, s):
-    """Subroutine to update last position of candidate solution.
-
-    If the previous solution was rejected, the final position is
-    advanced to the next position, unless the end of the board
-    has been reached, in which case this function returns None.
-
-    Args:
-        n (int): dimensions of board and number of queens.
-        s (list): list of current candidate positions for solution.
-
-    Returns: New list of candidate positions for solution, or None if
-        at end of board.
-    """
-    last = s[-1]
-    if last[1] < n-1:
-        return s[:-1] + [[last[0], last[1]+1]]
-    elif last[0] < n-1:
-        return s[:-1] + [[last[0]+1, 0]]
-    else:
-        return None
+    return (solutions)
 
 
 if __name__ == "__main__":
-    import sys
-
     if len(sys.argv) != 2:
-        print('Usage: nqueens N')
-        exit(1)
-    n = sys.argv[1]
-    if not n.isdigit():
-        print('N must be a number')
-        exit(1)
-    n = int(n)
-    if n < 4:
-        print('N must be at least 4')
-        exit(1)
-    nqueens(n)
-    exit(0)
+        print("Usage: nqueens N")
+        sys.exit(1)
+    if sys.argv[1].isdigit() is False:
+        print("N must be a number")
+        sys.exit(1)
+    if int(sys.argv[1]) < 4:
+        print("N must be at least 4")
+        sys.exit(1)
+
+    board = init_board(int(sys.argv[1]))
+    solutions = recursive_solve(board, 0, 0, [])
+    for sol in solutions:
+        print(sol)
