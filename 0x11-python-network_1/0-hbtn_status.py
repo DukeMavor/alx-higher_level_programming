@@ -1,15 +1,14 @@
 #!/usr/bin/python3
-"""Script to request content from `https://intranet.hbtn.io/status`"""
+"""fetches https://intranet.hbtn.io/status"""
 
 import urllib.request
-import urllib.error
+import urllib.parse
 
-try:
-    with urllib.request.urlopen('https://intranet.hbtn.io/status') as r:
-        body = r.read()
+
+if __name__ == "__main__":
+    with urllib.request.urlopen('https://intranet.hbtn.io/status') as response:
+        html = response.read()
         print('Body response:')
-        print('\t- type: {}'.format(type(body)))
-        print('\t- content: {}'.format(body))
-        print('\t- utf8 content: {}'.format(body.decode('utf8')))
-except urllib.error.URLError as e:
-    print(e)
+        print('\t- type:', type(html))
+        print('\t- content:', html)
+        print('\t- utf8 content:', html.decode('UTF-8'))
